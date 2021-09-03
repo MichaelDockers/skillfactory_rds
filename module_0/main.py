@@ -1,19 +1,8 @@
 import random
 
 
-# def is_valid(number):
-#     try:
-#         if int(number) <= 0:
-#             print('Wrong input - < 0')
-#             return False
-#     except ValueError:
-#         print('Not digit')
-#         return False
-#     return True
-
-
 def valid_num_input(number):
-
+    # Function that checking input string (must be positive number) and returning as int
     while True:
         try:
             if int(number) <= 0:
@@ -27,6 +16,7 @@ def valid_num_input(number):
 
 
 def manual_find(number):
+    # Function to manually find random generated number
     counter = 1
     print(number)
     num = valid_num_input(input('Your try: '))
@@ -41,17 +31,18 @@ def manual_find(number):
         else:
             print(f'Great. Its the number {num} and {counter}')
             return counter
-
         num = valid_num_input(input('Try more: '))
 
     print(f'Great. Its the number {num} and you needed {counter} attempt(s)')
 
 
 def find_number(number, limit):
+    # Function to auto find random generated number
     left_limit = 1
     right_limit = limit
     middle = 0
     step = 0
+
     while middle != number:
         step += 1
         middle = (left_limit + right_limit) // 2
@@ -64,10 +55,14 @@ def find_number(number, limit):
 
 
 def score_game(limit=100, array=1000, s='y'):
+    # Function that generated attempts array and send it to find_number func
     counter = []
+
+    # s - for seed
     if s == 'y':
         random.seed(1)
 
+    # Creating random array with upper limit (def=100) and size=array
     random_array = [random.randint(1, limit) for _ in range(array)]
     for number in random_array:
         counter.append(find_number(number, limit))
@@ -75,6 +70,7 @@ def score_game(limit=100, array=1000, s='y'):
 
 
 def menu():
+    # Menu function
     print('1: Manual find')
     print('2: Auto find')
     print('3: Exit')
