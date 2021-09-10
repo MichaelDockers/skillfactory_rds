@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from itertools import chain
+from itertools import chain, combinations
 from collections import Counter
 
 
@@ -157,7 +157,14 @@ print(df.explode('production_companies').groupby('production_companies')['overvi
 
 print()
 print('26. 1 percent best rating movies:')
-print(df[df['vote_average'] >= round(df['vote_average'].max() * 0.99)][['original_title', 'vote_average']])
+print(df[df['vote_average'] >= df['vote_average'].quantile(0.99)][['original_title', 'vote_average']].nlargest(5, 'vote_average'))
 
 rate_99 = np.percentile(df.vote_average, 99)
 print(df[df['vote_average'] > rate_99][['original_title', 'vote_average']].sort_values(by='vote_average'))
+
+print()
+print('23. The most winter director:')
+df['cast'] = df['cast'].apply(lambda x: list(combinations(x, 2)))
+print(df['cast'])
+
+print(df.explode('cast')['cast'].value_counts())
