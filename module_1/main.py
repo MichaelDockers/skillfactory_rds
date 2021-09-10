@@ -53,7 +53,6 @@ print(df[df['profit'] == df['profit'].min()][output_list])
 print()
 print('8. Number of profit movies:')
 print(df[df['profit'] > 0]['profit'].count())
-# print(df[df['revenue'] > df['budget']]['imdb_id'].count())
 
 print()
 print('9. Best profit 2008 year movie:')
@@ -63,9 +62,6 @@ print(df[df['release_year'] == 2008][output_list].nlargest(1, ['profit']))
 
 print()
 print('10. Best loser 2012 - 2014 year movie:')
-# custom_df = df[(df['release_year'] >= 2012) &
-#                (df['release_year'] <= 2014)][['imdb_id', 'profit', 'original_title', 'release_year']]
-# print(custom_df[custom_df['profit'] == custom_df['profit'].min()])
 print(df[(df['release_year'] >= 2012) & (df['release_year'] <= 2014)][output_list].nsmallest(1, ['profit']))
 
 print()
@@ -99,10 +95,9 @@ print(df[df.genres.str.join('').str.contains('Action')].explode('director').
 print()
 print('15. The actor with biggest sum revenue in 2012 year:')
 print(df[df['release_year'] == 2012].explode('cast').groupby('cast')['revenue'].sum().idxmax())
-print(df[df['release_year'] == 2012].explode('cast').value_counts('revenue').idxmax())
 
 print()
-print('16. The most budget actor:')
+print('16. The most budget actor (more than mean):')
 print(df[df['budget'] > df['budget'].mean()].explode('cast').groupby('cast')['cast'].count().idxmax())
 
 print()
@@ -157,7 +152,8 @@ print(df.explode('production_companies').groupby('production_companies')['overvi
 
 print()
 print('26. 1 percent best rating movies:')
-print(df[df['vote_average'] >= df['vote_average'].quantile(0.99)][['original_title', 'vote_average']].nlargest(5, 'vote_average'))
+print(df[df['vote_average'] >= df['vote_average'].quantile(0.99)]
+      [['original_title', 'vote_average']].nlargest(5, 'vote_average'))
 
 rate_99 = np.percentile(df.vote_average, 99)
 print(df[df['vote_average'] > rate_99][['original_title', 'vote_average']].sort_values(by='vote_average'))
