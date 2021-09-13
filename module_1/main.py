@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 from itertools import chain, combinations
 from collections import Counter
 
@@ -8,7 +7,23 @@ def most_frequent(list_in):
     return Counter(list_in).most_common(1)
 
 
-df = pd.read_csv('movie_bd_v5.csv')
+def gen_answer_key():
+    counter = 0
+    while True:
+        counter += 1
+        yield f'{counter:02}'
+
+
+def dict_add(lst_in):
+    answers[next(it)] = lst_in
+
+
+answers = {}
+data = pd.read_csv('movie_bd_v5.csv')
+
+df = data.copy()
+it = gen_answer_key()
+
 df['profit'] = df['revenue'] - df['budget']
 df['title_len'] = df['original_title'].apply(lambda x: len(str(x)))
 df['overview_counter'] = df['overview'].apply(lambda x: len(x.split()))
@@ -24,7 +39,7 @@ print(df.columns)
 
 print()
 print('1. The most budget movie:')
-print(df[df['budget'] == df['budget'].max()][['imdb_id', 'budget', 'original_title']])
+print(df[df['budget'] == df['budget'].max()][['imdb_id', 'budget', 'original_title']].to_string(header=False, index=False))
 
 print()
 print('2. The longest movie:')
@@ -55,10 +70,8 @@ print('8. Number of profit movies:')
 print(df[df['profit'] > 0]['profit'].count())
 
 print()
-print('9. Best profit 2008 year movie:')
-# custom_df = df[df['release_year'] == 2008][['imdb_id', 'profit', 'original_title', 'release_year']]
-# print(custom_df[custom_df['profit'] == custom_df['profit'].max()])
-print(df[df['release_year'] == 2008][output_list].nlargest(1, ['profit']))
+print('9. Most revenue 2008 year movie:')
+print(df[df['release_year'] == 2008][['imdb_id', 'revenue', 'original_title']].nlargest(1, ['revenue']))
 
 print()
 print('10. Best loser 2012 - 2014 year movie:')
@@ -66,26 +79,17 @@ print(df[(df['release_year'] >= 2012) & (df['release_year'] <= 2014)][output_lis
 
 print()
 print('11. The most common genre:')
-# print(most_common(list(df.explode('genres')['genres'])))
-# print(most_common(list(df.genres.str.split('|'))))
-# temp = list(df.genres.str.split('|'))
+print(most_frequent(list(df.explode('genres')['genres'])))
 print(most_frequent(list(chain.from_iterable(df['genres']))))
-
-# genre_list1 = list(chain.from_iterable([i.split('|') for i in list(df['genres'])]))
-# print(genre_list1)
-# print(most_common(list(chain.from_iterable([i.split('|') for i in list(df['genres'])]))))
 
 print()
 print('12. The most common genre in profit movies:')
 print(most_frequent(list(chain.from_iterable(df[df.profit > 0]['genres']))))
-# print(most_common(list(df.explode('genres')[df['profit'] > 0]['genres'])))
-# genre_list2 = list(chain.from_iterable([i.split('|') for i in list(df[df['profit'] > 0]]['genres'])]))
-# print(most_common(genre_list2))
+print(most_frequent(list(df[df['profit'] > 0].explode('genres')['genres'])))
 
 print()
-print('13. The most profit director:')
+print('13. The most revenue director:')
 print(df.explode('director').groupby('director')['revenue'].sum().idxmax())
-# print(df.groupby('director')['revenue'].sum().max())
 
 print()
 print('14. The most action director:')
@@ -120,21 +124,11 @@ print(df[df.production_companies.str.join('').str.contains('Warner Bros')].group
       ['profit'].sum().idxmax())
 
 print()
-print('20. Most profit year of Warner Bros?:')
-print(df[df.production_companies.str.join('').str.contains('Warner Bros')].groupby('release_year')
-      ['profit'].sum().idxmax())
-
-print()
-print('20. Most profit year of Warner Bros?:')
-print(df[df.production_companies.str.join('').str.contains('Warner Bros')].groupby('release_year')
-      ['profit'].sum().idxmax())
-
-print()
 print('21. The most productive month for all years:')
 print(df.groupby(df['release_date'].dt.month)['imdb_id'].count().idxmax())
 
 print()
-print('22. The most productive month for all years:')
+print('22. Sum of summer movies for all years:')
 print(df[df['release_date'].dt.month.isin([6, 7, 8])]['imdb_id'].count())
 
 print()
@@ -147,7 +141,7 @@ print('24. Longest title studio:')
 print(df.explode('production_companies').groupby('production_companies')['title_len'].max().idxmax())
 
 print()
-print('25. Max word overview studio:')
+print('25. The longest mean (by words) overview studio:')
 print(df.explode('production_companies').groupby('production_companies')['overview_counter'].mean().idxmax())
 
 print()
@@ -155,12 +149,10 @@ print('26. 1 percent best rating movies:')
 print(df[df['vote_average'] >= df['vote_average'].quantile(0.99)]
       [['original_title', 'vote_average']].nlargest(5, 'vote_average'))
 
-rate_99 = np.percentile(df.vote_average, 99)
-print(df[df['vote_average'] > rate_99][['original_title', 'vote_average']].sort_values(by='vote_average'))
-
 print()
 print('23. The most winter director:')
 df['cast'] = df['cast'].apply(lambda x: list(combinations(x, 2)))
-print(df['cast'])
+print(df.explode('cast')['cast'].value_counts().nlargest(1))
 
-print(df.explode('cast')['cast'].value_counts())
+for key, item in answers.items():
+    print(key, item)
