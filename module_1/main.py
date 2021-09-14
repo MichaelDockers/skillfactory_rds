@@ -4,7 +4,7 @@ from collections import Counter
 
 
 def most_frequent(list_in):
-    """Function to count strins in list. Output one most common string (can be changed to another value if needed)"""
+    """Function to count strings in list. Output one most common string (can be changed to another value if needed)"""
     return Counter(list_in).most_common(1)
 
 
