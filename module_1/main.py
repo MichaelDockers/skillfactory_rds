@@ -4,10 +4,12 @@ from collections import Counter
 
 
 def most_frequent(list_in):
+    """Function to count strins in list. Output one most common string (can be changed to another value if needed)"""
     return Counter(list_in).most_common(1)
 
 
 def gen_answer_key():
+    """Generator of endless nums (output string)"""
     counter = 0
     while True:
         counter += 1
@@ -15,21 +17,65 @@ def gen_answer_key():
 
 
 def dict_add(lst_in):
+    """Func for adding string to dict with auto generated keys"""
     answers[next(it)] = lst_in
 
 
+def print_dict():
+    """Func for print answers dict combining with questions"""
+    for quest, answer in zip(questions, answers.items()):
+        print(f'{answer[0]}. - {quest} {answer[1]}')
+
+
+# Creating dict to answers
 answers = {}
+questions = [
+    'The most budget movie:',
+    'The longest movie:',
+    'The shortest movie:',
+    'Mean runtime movie:',
+    'Median runtime movie:',
+    'The most profit movie:',
+    'Worst profit movie:',
+    'Number of profit movies:',
+    'Most revenue 2008 year movie:',
+    'Best loser 2012 - 2014 year movie:',
+    'The most common genre:',
+    'The most common genre in profit movies:',
+    'The most revenue director:',
+    'The most action director:',
+    'The actor with biggest sum revenue in 2012 year:',
+    'The most budget actor (more than mean):',
+    'Most common genre of Nicolas Cage:',
+    'The worth movie of Paramount Pictures:',
+    'The best year of sum revenue:',
+    'Most profit year of Warner Bros?:',
+    'The most productive month for all years:',
+    'Sum of summer movies for all years:',
+    'The most winter director:',
+    'Longest title studio:',
+    'The longest mean (by words) overview studio:',
+    '1 percent best rating movies:',
+    'The most common duet',
+]
+
+# Reading data from CSV file
 data = pd.read_csv('movie_bd_v5.csv')
 
+# Creating copy of original dataframe to manipulate
 df = data.copy()
+
+# Creating iterator fot dict keys
 it = gen_answer_key()
 
+# Making some processing on copy of dataframe
 df['profit'] = df['revenue'] - df['budget']
 df['title_len'] = df['original_title'].apply(lambda x: len(str(x)))
 df['overview_counter'] = df['overview'].apply(lambda x: len(x.split()))
 df['director'] = df['director'].str.split('|')
 df['genres'] = df['genres'].str.split('|')
 df['cast'] = df['cast'].str.split('|')
+df['cast_treat'] = df['cast'].apply(lambda x: list(combinations(x, 2)))
 df['production_companies'] = df['production_companies'].str.split('|')
 df['release_date'] = pd.to_datetime(df['release_date'], format='%m/%d/%Y')
 output_list = ['imdb_id', 'profit', 'original_title', 'release_year']
@@ -37,122 +83,99 @@ output_list = ['imdb_id', 'profit', 'original_title', 'release_year']
 print(df.info())
 print(df.columns)
 
-print()
-print('1. The most budget movie:')
-print(df[df['budget'] == df['budget'].max()][['imdb_id', 'budget', 'original_title']].to_string(header=False, index=False))
+# Quest 1
+dict_add(df[df['budget'] == df['budget'].max()]['original_title'].to_string(header=False, index=False))
 
-print()
-print('2. The longest movie:')
-print(df[df['runtime'] == df['runtime'].max()][['imdb_id', 'runtime', 'original_title']])
+# Quest 2
+dict_add(df[df['runtime'] == df['runtime'].max()]['original_title'].to_string(header=False, index=False))
 
-print()
-print('3. The shortest movie:')
-print(df[df['runtime'] == df['runtime'].min()][['imdb_id', 'runtime', 'original_title']])
+# Quest 3
+dict_add(df[df['runtime'] == df['runtime'].min()]['original_title'].to_string(header=False, index=False))
 
-print()
-print('4. Mean runtime movie:')
-print(round(df['runtime'].mean()))
+# Quest 4
+dict_add(round(df['runtime'].mean()))
 
-print()
-print('5. Median runtime movie:')
-print(df['runtime'].median())
+# Quest 5
+dict_add(int(df['runtime'].median()))
 
-print()
-print('6. The most profit movie:')
-print(df[df['profit'] == df['profit'].max()][output_list])
+# Quest 6
+dict_add(df[df['profit'] == df['profit'].max()]['original_title'].to_string(header=False, index=False))
 
-print()
-print('7. Worst profit movie:')
-print(df[df['profit'] == df['profit'].min()][output_list])
+# Quest 7
+dict_add(df[df['profit'] == df['profit'].min()]['original_title'].to_string(header=False, index=False))
 
-print()
-print('8. Number of profit movies:')
-print(df[df['profit'] > 0]['profit'].count())
+# Quest 8
+dict_add(df[df['profit'] > 0]['profit'].count())
 
-print()
-print('9. Most revenue 2008 year movie:')
-print(df[df['release_year'] == 2008][['imdb_id', 'revenue', 'original_title']].nlargest(1, ['revenue']))
+# Quest 9
+dict_add(df[df['release_year'] == 2008][['original_title', 'revenue']].
+         nlargest(1, ['revenue']).to_string(header=False, index=False))
 
-print()
-print('10. Best loser 2012 - 2014 year movie:')
-print(df[(df['release_year'] >= 2012) & (df['release_year'] <= 2014)][output_list].nsmallest(1, ['profit']))
+# Quest 10
+dict_add(df[(df['release_year'] >= 2012) & (df['release_year'] <= 2014)]
+         [['original_title', 'profit']].nsmallest(1, ['profit']).to_string(header=False, index=False))
 
-print()
-print('11. The most common genre:')
-print(most_frequent(list(df.explode('genres')['genres'])))
-print(most_frequent(list(chain.from_iterable(df['genres']))))
+# Quest 11 (option 1)
+dict_add(most_frequent(list(df.explode('genres')['genres'])))
 
-print()
-print('12. The most common genre in profit movies:')
-print(most_frequent(list(chain.from_iterable(df[df.profit > 0]['genres']))))
-print(most_frequent(list(df[df['profit'] > 0].explode('genres')['genres'])))
+# Quest 11 (option 2)
+# dict_add(most_frequent(list(chain.from_iterable(df['genres']))))
 
-print()
-print('13. The most revenue director:')
-print(df.explode('director').groupby('director')['revenue'].sum().idxmax())
+# Quest 12 (option 1)
+dict_add(most_frequent(list(chain.from_iterable(df[df.profit > 0]['genres']))))
 
-print()
-print('14. The most action director:')
-print(df[df.genres.str.join('').str.contains('Action')].explode('director').
-      groupby('director')['genres'].count().idxmax())
+# Quest 12 (option 2)
+# dict_add(most_frequent(list(df[df['profit'] > 0].explode('genres')['genres'])))
 
-print()
-print('15. The actor with biggest sum revenue in 2012 year:')
-print(df[df['release_year'] == 2012].explode('cast').groupby('cast')['revenue'].sum().idxmax())
+# Quest 13
+dict_add(df.explode('director').groupby('director')['revenue'].sum().idxmax())
 
-print()
-print('16. The most budget actor (more than mean):')
-print(df[df['budget'] > df['budget'].mean()].explode('cast').groupby('cast')['cast'].count().idxmax())
+# Quest 14
+dict_add(df[df.genres.str.join('').str.contains('Action')].explode('director').
+         groupby('director')['genres'].count().idxmax())
 
-print()
-print('17. Most common genre of Nicolas Cage:')
-print(df[df.cast.str.join('').str.contains('Nicolas Cage')].explode('genres').
-      groupby('genres')['genres'].count().idxmax())
+# Quest 15
+dict_add(df[df['release_year'] == 2012].explode('cast').groupby('cast')['revenue'].sum().idxmax())
 
-print()
-print('18. The worth movie of Paramount Pictures:')
-print(df[df.production_companies.str.join('').str.contains('Paramount Pictures')]
-      [output_list].nsmallest(1, 'profit'))
+# Quest 16
+dict_add(df[df['budget'] > df['budget'].mean()].explode('cast').groupby('cast')['cast'].count().idxmax())
 
-print()
-print('19. The best year of sum revenue:')
-print(df.groupby('release_year')['revenue'].sum().idxmax())
+# Quest 17
+dict_add(df[df.cast.str.join('').str.contains('Nicolas Cage')].explode('genres').
+         groupby('genres')['genres'].count().idxmax())
 
-print()
-print('20. Most profit year of Warner Bros?:')
-print(df[df.production_companies.str.join('').str.contains('Warner Bros')].groupby('release_year')
-      ['profit'].sum().idxmax())
+# Quest 18
+dict_add(df[df.production_companies.str.join('').str.contains('Paramount Pictures')]
+         [['original_title', 'profit']].nsmallest(1, 'profit').to_string(header=False, index=False))
 
-print()
-print('21. The most productive month for all years:')
-print(df.groupby(df['release_date'].dt.month)['imdb_id'].count().idxmax())
+# Quest 19
+dict_add(df.groupby('release_year')['revenue'].sum().idxmax())
 
-print()
-print('22. Sum of summer movies for all years:')
-print(df[df['release_date'].dt.month.isin([6, 7, 8])]['imdb_id'].count())
+# Quest 20
+dict_add(df[df.production_companies.str.join('').str.contains('Warner Bros')].groupby('release_year')
+         ['profit'].sum().idxmax())
 
-print()
-print('23. The most winter director:')
-print(df[df['release_date'].dt.month.isin([1, 2, 12])].
-      explode('director').groupby('director')['imdb_id'].count().idxmax())
+# Quest 21
+dict_add(df.groupby(df['release_date'].dt.month)['imdb_id'].count().idxmax())
 
-print()
-print('24. Longest title studio:')
-print(df.explode('production_companies').groupby('production_companies')['title_len'].max().idxmax())
+# Quest 22
+dict_add(df[df['release_date'].dt.month.isin([6, 7, 8])]['imdb_id'].count())
 
-print()
-print('25. The longest mean (by words) overview studio:')
-print(df.explode('production_companies').groupby('production_companies')['overview_counter'].mean().idxmax())
+# Quest 23
+dict_add(df[df['release_date'].dt.month.isin([1, 2, 12])].
+         explode('director').groupby('director')['imdb_id'].count().idxmax())
 
-print()
-print('26. 1 percent best rating movies:')
-print(df[df['vote_average'] >= df['vote_average'].quantile(0.99)]
-      [['original_title', 'vote_average']].nlargest(5, 'vote_average'))
+# Quest 24
+dict_add(df.explode('production_companies').groupby('production_companies')['title_len'].max().idxmax())
 
-print()
-print('23. The most winter director:')
-df['cast'] = df['cast'].apply(lambda x: list(combinations(x, 2)))
-print(df.explode('cast')['cast'].value_counts().nlargest(1))
+# Quest 25
+dict_add(df.explode('production_companies').groupby('production_companies')['overview_counter'].mean().idxmax())
 
-for key, item in answers.items():
-    print(key, item)
+# Quest 26
+dict_add(df[df['vote_average'] >= df['vote_average'].quantile(0.99)]
+         [['original_title', 'vote_average']].nlargest(5, 'vote_average').to_string(header=False, index=False))
+
+# Quest 27
+dict_add(df.explode('cast_treat')['cast_treat'].value_counts().nlargest(1).to_string(header=False))
+
+print_dict()
