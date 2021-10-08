@@ -15,3 +15,4 @@ for col in data.drop(['absences', 'score'], axis=1):
         data[col] = data[col].apply(lambda x: abs(x) if x < 0 else x)
 
 print(data['health'].unique())
+print(data['higher'].value_counts())
