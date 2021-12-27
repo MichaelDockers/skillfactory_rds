@@ -1,0 +1,71 @@
+WITH fc AS
+   (SELECT ac.aircraft_code,
+           ac.model,
+		   COUNT(st.seat_no) AS seats_per_craft,
+           CASE
+           WHEN ac.aircraft_code = '733' THEN 7.8
+           WHEN ac.aircraft_code = '763' THEN 4.8
+           WHEN ac.aircraft_code = 'SU9' THEN 1.7
+           WHEN ac.aircraft_code = '320' THEN 2.5
+           WHEN ac.aircraft_code = '321' THEN 2.74
+           WHEN ac.aircraft_code = '319' THEN 2.35
+           WHEN ac.aircraft_code = '773' THEN 2.4
+           WHEN ac.aircraft_code = 'CN1' THEN 0.2
+           WHEN ac.aircraft_code = 'CR2' THEN 1.1
+           END AS fuel_consumption
+      FROM dst_project.aircrafts AS ac
+   		   LEFT JOIN dst_project.seats AS st ON ac.aircraft_code = st.aircraft_code
+     GROUP BY ac.aircraft_code),
+
+fuel_price AS
+      (SELECT *
+         FROM (VALUES('2016-12-01'::date, 38867), 
+			   	     ('2017-01-01'::date, 41435), 
+			         ('2017-02-01'::date, 39553)) AS p_date(date, fuel_price_by_month)),
+     
+anapa_f AS
+   (SELECT *
+      FROM dst_project.flights AS f
+     WHERE DATE_TRUNC('month', f.scheduled_departure) IN ('2016-12-01',
+                                                          '2017-01-01',
+                                                          '2017-02-01')
+       AND f.departure_airport IN (SELECT ap.airport_code
+                                     FROM dst_project.airports AS ap
+                                    WHERE ap.city IN ('Anapa'))
+       AND f.status NOT IN ('Cancelled')),
+
+res_table AS
+     (SELECT anapa_f.flight_id,
+             anapa_f.arrival_airport,
+             anapa_f.actual_departure,
+             anapa_f.actual_arrival,       
+	         fc.model AS aircraft_model,
+	  		 fc.seats_per_craft,
+             fc.fuel_consumption,
+             fuel_price.fuel_price_by_month,
+             SUM(tf.amount) AS flight_income,
+             COUNT(tf.ticket_no) AS sold_tickets,
+             (EXTRACT(EPOCH FROM (anapa_f.actual_arrival - anapa_f.actual_departure))/60/60*fc.fuel_consumption*fuel_price.fuel_price_by_month)::int AS flight_cost,
+             (SUM(tf.amount) - (EXTRACT(EPOCH FROM (anapa_f.actual_arrival - anapa_f.actual_departure))/60/60*fc.fuel_consumption*fuel_price.fuel_price_by_month)::int) AS PnL,
+             ROW_NUMBER() OVER(PARTITION BY anapa_f.arrival_airport ORDER BY SUM(tf.amount)-(EXTRACT(EPOCH FROM (anapa_f.actual_arrival - anapa_f.actual_departure))/60/60*fc.fuel_consumption*fuel_price.fuel_price_by_month)::int) AS rn
+        FROM anapa_f
+             LEFT JOIN dst_project.ticket_flights AS tf ON anapa_f.flight_id = tf.flight_id
+             LEFT JOIN dst_project.boarding_passes AS bp ON tf.flight_id = bp.flight_id AND tf.ticket_no = bp.ticket_no
+             LEFT JOIN fc ON anapa_f.aircraft_code = fc.aircraft_code
+             LEFT JOIN fuel_price ON EXTRACT(YEAR FROM anapa_f.actual_departure) = EXTRACT(YEAR FROM fuel_price.date)
+                   AND EXTRACT(MONTH FROM anapa_f.actual_departure) = EXTRACT(MONTH FROM fuel_price.date)
+    GROUP BY anapa_f.flight_id,
+             anapa_f.arrival_airport,
+             anapa_f.actual_departure,
+             anapa_f.actual_arrival,
+             aircraft_model,      
+	         fc.seats_per_craft,       
+	         fc.fuel_consumption,
+             fuel_price.fuel_price_by_month,
+             flight_cost
+    ORDER BY anapa_f.arrival_airport,
+             rn)
+
+   SELECT res_table.*, res_table.sold_tickets*100/res_table.seats_per_craft AS flight_occupancy
+     FROM res_table
+    WHERE res_table.rn < 6
