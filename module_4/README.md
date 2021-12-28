@@ -14,9 +14,9 @@
 аэропорта Анапы) и информация о потреблении топлива самолетами.
 
 ### Что за файлы в модуле 4
-tasks_before_project - решения подготовительных заданий
-project_sql_query - запрос по проекту
-result_project_query_5_by_flight.csv - выгрузка по запросу проекта (по 5 рейсов на направление)
-result_project_query_all_flights.csv - выгрузка по запросу проекта по всем полетам
-modul_4_flights_analize.ipynb - ноутбук с дополнительным анализом доходности
-https://disk.yandex.ru/i/eEPK4y4epU00rw - ссылка на презентацию
+tasks_before_project - решения подготовительных заданий<br>
+project_sql_query - запрос по проекту<br>
+result_project_query_5_by_flight.csv - выгрузка по запросу проекта (по 5 рейсов на направление)<br>
+result_project_query_all_flights.csv - выгрузка по запросу проекта по всем полетам<br>
+modul_4_flights_analize.ipynb - ноутбук с дополнительным анализом доходности<br>
+https://disk.yandex.ru/i/eEPK4y4epU00rw - ссылка на презентацию<br>
