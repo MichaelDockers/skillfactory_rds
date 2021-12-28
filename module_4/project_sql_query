@@ -1,3 +1,4 @@
+-- CTE to add fuel consumption for every aircraft
 WITH fc AS
    (SELECT ac.aircraft_code,
            ac.model,
@@ -17,12 +18,14 @@ WITH fc AS
    		   LEFT JOIN dst_project.seats AS st ON ac.aircraft_code = st.aircraft_code
      GROUP BY ac.aircraft_code),
 
+-- CTE for making table with prices for every winter month in Anapa airport 
 fuel_price AS
       (SELECT *
          FROM (VALUES('2016-12-01'::date, 38867), 
 			   	     ('2017-01-01'::date, 41435), 
 			         ('2017-02-01'::date, 39553)) AS p_date(date, fuel_price_by_month)),
-     
+
+-- CTE that filter flights table by City Anapa and required months (winter 2017)
 anapa_f AS
    (SELECT *
       FROM dst_project.flights AS f
@@ -34,6 +37,7 @@ anapa_f AS
                                     WHERE ap.city IN ('Anapa'))
        AND f.status NOT IN ('Cancelled')),
 
+-- main CTE that combine all CTE together and calculate PnL column and Row_Number column
 res_table AS
      (SELECT anapa_f.flight_id,
              anapa_f.arrival_airport,
@@ -66,6 +70,7 @@ res_table AS
     ORDER BY anapa_f.arrival_airport,
              rn)
 
+-- query that output 5 rows with smallest income for every month
    SELECT res_table.*, res_table.sold_tickets*100/res_table.seats_per_craft AS flight_occupancy
      FROM res_table
     WHERE res_table.rn < 6
