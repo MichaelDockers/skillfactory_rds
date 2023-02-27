@@ -1,4 +1,4 @@
-# Skillfactory education projects
+# SkillFactory education projects (Data Science Course)
 
 ### [module_0](module_0) - Guess Number game - Python programming project
 
