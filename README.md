@@ -2,7 +2,7 @@
 
 ## module_0 - Guess Number game - Python programming project
 
-## module_1 - Who wants to become a millionaire - Pandas education project
+## [module_1](module_1) - Who wants to become a millionaire - Pandas education project
 
 ## module_2 - EDA project.
 Using data of influence life conditions of students (15-22 years) to they progress in math to detect ones in risk position.
