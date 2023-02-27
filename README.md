@@ -1,6 +1,6 @@
 # Skillfactory education projects
 
-### [Guess Number game](module_0) - Python programming project
+### [module_0](module_0) - Guess Number game - Python programming project
 
 ### [module_1](module_1) - Who wants to become a millionaire - Pandas education project
 
